@@ -55,7 +55,7 @@ func (e *Executor) Execute(callerWg *sync.WaitGroup) {
 		}
 		e.mu.RUnlock()
 
-		task, ok := e.queue.Shift()
+		task, ok := e.queue.ShiftUnique(e.State())
 		if !ok {
 			// should be always ok, but just in case
 			<-e.workerChan
@@ -110,17 +110,8 @@ func (e *Executor) Shutdown() {
 	<-e.workerChan
 }
 
-// ! TODO move
-func MapKeys[K comparable, V any](m map[K]V) []K {
-	keys := make([]K, 0, len(m))
-	for key := range m {
-		keys = append(keys, key)
-	}
-	return keys
-}
-
-func (e *Executor) State() []string {
+func (e *Executor) State() map[string]bool {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	return MapKeys(e.activeTasks)
+	return e.activeTasks
 }

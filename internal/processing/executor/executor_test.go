@@ -4,6 +4,7 @@ import (
 	"go-parallel_queue/internal/processing/executor"
 	"go-parallel_queue/internal/processing/queue"
 	"go-parallel_queue/internal/processing/task"
+	"go-parallel_queue/pkg/utils"
 	"os"
 	"sync"
 	"testing"
@@ -126,7 +127,7 @@ func TestWorkersCount3(t *testing.T) {
 	// act
 	e.Notify()
 	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
-	activeTasks := e.State()
+	activeTasks := utils.MapKeys(e.State())
 
 	e.Shutdown()
 	ourWg.Wait()
