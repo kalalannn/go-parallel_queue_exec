@@ -10,7 +10,7 @@ import (
 
 func TestMain(t *testing.T) {
 	q := queue.NewQueue()
-	emptyTask := task.Task{}
+	emptyTask := &task.Task{}
 
 	// empty queue
 	empty, notOk := q.ShiftUnique(map[string]bool{})
@@ -37,5 +37,5 @@ func TestMain(t *testing.T) {
 
 	// state correct
 	order := q.State()
-	assert.Equal(t, order, []task.Task{task2})
+	assert.Equal(t, order, []*task.Task{task2})
 }

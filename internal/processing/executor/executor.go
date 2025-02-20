@@ -78,7 +78,7 @@ func (e *Executor) Execute(callerWg *sync.WaitGroup) {
 	callerWg.Done()
 }
 
-func (e *Executor) executeTask(t task.Task) {
+func (e *Executor) executeTask(t *task.Task) {
 	defer func() {
 		<-e.workerChan
 

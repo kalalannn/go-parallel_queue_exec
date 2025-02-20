@@ -7,16 +7,16 @@ import (
 
 type Queue struct {
 	mu    sync.RWMutex
-	tasks []task.Task
+	tasks []*task.Task
 }
 
 func NewQueue() *Queue {
 	return &Queue{
-		tasks: make([]task.Task, 0),
+		tasks: make([]*task.Task, 0),
 	}
 }
 
-func (q *Queue) Append(t task.Task) error {
+func (q *Queue) Append(t *task.Task) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
@@ -25,13 +25,13 @@ func (q *Queue) Append(t task.Task) error {
 	return nil
 }
 
-func (q *Queue) ShiftUnique(tasks map[string]bool) (task.Task, bool) {
+func (q *Queue) ShiftUnique(tasks map[string]bool) (*task.Task, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
 	emptyTask := task.Task{}
 	if len(q.tasks) == 0 {
-		return emptyTask, false
+		return &emptyTask, false
 	}
 
 	for i, t := range q.tasks {
@@ -41,10 +41,10 @@ func (q *Queue) ShiftUnique(tasks map[string]bool) (task.Task, bool) {
 		}
 	}
 
-	return emptyTask, false
+	return &emptyTask, false
 }
 
-func (q *Queue) State() []task.Task {
+func (q *Queue) State() []*task.Task {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
 	return q.tasks

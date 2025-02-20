@@ -5,8 +5,8 @@ type Task struct {
 	ID       string // unique identifier
 }
 
-func NewTask(id string, duration int) Task {
-	return Task{
+func NewTask(id string, duration int) *Task {
+	return &Task{
 		Duration: duration,
 		ID:       id,
 	}
