@@ -12,7 +12,7 @@ func TestMain(t *testing.T) {
 	q := queue.NewQueue()
 
 	// empty queue
-	empty, notOk := q.ShiftUnique(map[string]bool{})
+	empty, notOk := q.ShiftUnique(map[string]int{})
 
 	assert.Zero(t, q.Len())
 	assert.False(t, notOk)
@@ -24,13 +24,13 @@ func TestMain(t *testing.T) {
 	q.Append(task2)
 
 	// shift works
-	taskShift, ok := q.ShiftUnique(map[string]bool{"some": true})
+	taskShift, ok := q.ShiftUnique(map[string]int{"some": 1})
 	assert.True(t, ok)
 	assert.Equal(t, taskShift, task1)
 	assert.Equal(t, 1, q.Len())
 
 	// not unique
-	taskShift, ok = q.ShiftUnique(map[string]bool{task2.ID: true})
+	taskShift, ok = q.ShiftUnique(map[string]int{task2.ID: 1})
 	assert.False(t, ok)
 	assert.Nil(t, taskShift)
 

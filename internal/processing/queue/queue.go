@@ -25,7 +25,7 @@ func (q *Queue) Append(tasks ...*task.Task) error {
 	return nil
 }
 
-func (q *Queue) ShiftUnique(excludeTasks map[string]bool) (*task.Task, bool) {
+func (q *Queue) ShiftUnique(excludeTasks map[string]int) (*task.Task, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 

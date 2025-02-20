@@ -11,7 +11,7 @@ import (
 
 type Executor struct {
 	queue          *queue.Queue
-	activeTasks    map[string]bool
+	activeTasks    map[string]int
 	workerChan     chan struct{}
 	mu             sync.RWMutex
 	wg             sync.WaitGroup
@@ -32,7 +32,7 @@ func NewExecutor(executorOptions *ExecutorOptions) *Executor {
 	}
 	return &Executor{
 		queue:       queue.NewQueue(),
-		activeTasks: make(map[string]bool),
+		activeTasks: make(map[string]int),
 		cond:        sync.NewCond(&sync.Mutex{}),
 		workerChan:  make(chan struct{}, executorOptions.WorkersLimit),
 	}
@@ -46,7 +46,7 @@ func (e *Executor) PlannedTasks() []*task.Task {
 	return e.queue.Tasks()
 }
 
-func (e *Executor) ActiveTasks() map[string]bool {
+func (e *Executor) ActiveTasks() map[string]int {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 	return e.activeTasks
@@ -95,7 +95,7 @@ OuterLoop:
 		e.workerChan <- struct{}{}
 
 		e.mu.Lock()
-		e.activeTasks[task.ID] = true
+		e.activeTasks[task.ID] = task.Duration
 		e.mu.Unlock()
 
 		e.wg.Add(1)
