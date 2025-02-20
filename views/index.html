@@ -2,10 +2,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/static/js/main.js"/></script>
+    <script src="/static/js/main.js"></script>
+    <link rel="stylesheet" href="/static/css/main.css">
     <title>Home</title>
 </head>
 <body>
-    <h1>Welcome, {{ .Name }}!</h1>
+    <div class="container">
+        <!-- Active Tasks Section -->
+        <div class="tasks-list" id="activeTasksSection">
+            <h2>Active Tasks</h2>
+            <ul id="activeTasks">
+                <!-- Active tasks will be dynamically inserted here -->
+            </ul>
+        </div>
+
+        <!-- Planned Tasks (Queue) Section -->
+        <div class="tasks-list" id="plannedTasksSection">
+            <h2>Planned Tasks (Queue)</h2>
+            <ul id="plannedTasks">
+                <!-- Planned tasks will be dynamically inserted here -->
+            </ul>
+        </div>
+    </div>
 </body>
 </html>

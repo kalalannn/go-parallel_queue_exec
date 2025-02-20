@@ -1,7 +1,6 @@
 package resolvers
 
 import (
-	"encoding/json"
 	"go-parallel_queue/internal/messages"
 	"go-parallel_queue/internal/server/services"
 	"log"
@@ -24,9 +23,7 @@ func NewResolver(execService *services.ExecutorService) *Resolver {
 }
 
 func (r *Resolver) HomeResolver(c *fiber.Ctx) error {
-	return c.Render("index", fiber.Map{
-		"Name": "Go Parallel Queue",
-	})
+	return c.Render("index", fiber.Map{})
 }
 
 func (r *Resolver) WebSocketResolver(c *websocket.Conn) {
@@ -35,27 +32,29 @@ func (r *Resolver) WebSocketResolver(c *websocket.Conn) {
 	r.execService.AddWebSocketClient(c)
 	defer r.execService.RemoveWebSocketClient(c)
 
+	_, msg, err := c.ReadMessage()
+	if err != nil {
+		log.Println("Read error:", err)
+		return
+	}
+
+	if err := c.WriteJSON(map[string]string{"message": messages.WelcomeMessage}); err != nil {
+		log.Println("Write error:", err)
+		return
+	}
+
 	for {
-		_, msg, err := c.ReadMessage()
+		_, _, err := c.ReadMessage()
 		if err != nil {
 			log.Println("Read error:", err)
 			return
 		}
-
 		_ = msg
 
-		response := map[string]any{
-			"activeTasks":  r.execService.ActiveTasks(),
-			"plannedTasks": r.execService.PlannedTasks(),
-		}
-		responseMsg, _ := json.Marshal(response)
-
-		if err := c.WriteMessage(websocket.TextMessage, responseMsg); err != nil {
+		if err := c.WriteJSON(map[string]string{"message": messages.UseRESTMessage}); err != nil {
 			log.Println("Write error:", err)
 			return
 		}
-
-		// time.Sleep(wsTimeout * time.Second)
 	}
 }
 

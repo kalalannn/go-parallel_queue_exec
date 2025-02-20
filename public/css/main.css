@@ -1,0 +1,71 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    padding: 20px;
+}
+
+.tasks-list {
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    width: 45%;
+}
+
+.tasks-list h2 {
+    text-align: center;
+    color: #333;
+}
+
+.tasks-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.tasks-list li {
+    margin: 8px 0;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tasks-list li span {
+    font-weight: bold;
+}
+
+#activeTasks {
+    list-style-type: none;
+    padding: 0;
+}
+
+#plannedTasks {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    margin: 5px 0;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.planned {
+    background-color: #7EC8E8;  /* Blue for planned tasks */
+}
+
+.active {
+    background-color: #76E03B;  /* Green for active tasks */
+}
