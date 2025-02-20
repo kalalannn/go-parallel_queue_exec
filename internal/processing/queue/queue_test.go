@@ -10,14 +10,13 @@ import (
 
 func TestMain(t *testing.T) {
 	q := queue.NewQueue()
-	emptyTask := &task.Task{}
 
 	// empty queue
 	empty, notOk := q.ShiftUnique(map[string]bool{})
 
 	assert.Zero(t, q.Len())
 	assert.False(t, notOk)
-	assert.Equal(t, empty, emptyTask)
+	assert.Nil(t, empty)
 
 	// arrange
 	task1, task2 := task.NewTask("1", 1), task.NewTask("2", 2)
@@ -33,9 +32,9 @@ func TestMain(t *testing.T) {
 	// not unique
 	taskShift, ok = q.ShiftUnique(map[string]bool{task2.ID: true})
 	assert.False(t, ok)
-	assert.Equal(t, taskShift, emptyTask)
+	assert.Nil(t, taskShift)
 
-	// state correct
-	order := q.State()
+	// Tasks correct
+	order := q.Tasks()
 	assert.Equal(t, order, []*task.Task{task2})
 }

@@ -16,35 +16,34 @@ func NewQueue() *Queue {
 	}
 }
 
-func (q *Queue) Append(t *task.Task) error {
+func (q *Queue) Append(tasks ...*task.Task) error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	q.tasks = append(q.tasks, t)
+	q.tasks = append(q.tasks, tasks...)
 
 	return nil
 }
 
-func (q *Queue) ShiftUnique(tasks map[string]bool) (*task.Task, bool) {
+func (q *Queue) ShiftUnique(excludeTasks map[string]bool) (*task.Task, bool) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	emptyTask := task.Task{}
 	if len(q.tasks) == 0 {
-		return &emptyTask, false
+		return nil, false
 	}
 
 	for i, t := range q.tasks {
-		if _, exists := tasks[t.ID]; !exists {
+		if _, exists := excludeTasks[t.ID]; !exists {
 			q.tasks = append(q.tasks[:i], q.tasks[i+1:]...)
 			return t, true
 		}
 	}
 
-	return &emptyTask, false
+	return nil, false
 }
 
-func (q *Queue) State() []*task.Task {
+func (q *Queue) Tasks() []*task.Task {
 	q.mu.RLock()
 	defer q.mu.RUnlock()
 	return q.tasks
