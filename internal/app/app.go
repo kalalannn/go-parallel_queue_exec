@@ -14,7 +14,7 @@ import (
 	"github.com/gofiber/template/html/v2"
 )
 
-const FiberShutdownTimeout = 5 * time.Second
+const FiberShutdownTimeout = 1 * time.Second
 const ExecutorShutdownTimeout = 5 * time.Second
 
 func Run() error {
@@ -39,12 +39,14 @@ func Run() error {
 
 	go func() {
 		<-sigChan
+		log.Println(messages.StartShutdownServer)
+
+		execService.ShutdownBroadcast()
+
 		log.Println(messages.StartShutdownFiber)
 		app.ShutdownWithTimeout(FiberShutdownTimeout)
 		serverShutdown <- struct{}{}
 	}()
-
-	log.Println(app.Stack())
 
 	err := app.Listen(":8080")
 

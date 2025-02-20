@@ -1,6 +1,7 @@
 package messages
 
-const StartShutdownFiber = "Gracefully shutdown Fiber..."
+const StartShutdownServer = "Gracefully shutdown Server..."
+const StartShutdownFiber = "Shutting down Fiber..."
 const EndShutdownFiber = "Fiber shutdown finished."
 
 const StartShutdownExecutorService = "Try to shutdown executor service..."

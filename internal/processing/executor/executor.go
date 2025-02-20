@@ -13,6 +13,7 @@ type Executor struct {
 	queue          *queue.Queue
 	activeTasks    map[string]int
 	workerChan     chan struct{}
+	updatesChan    chan map[string]any
 	mu             sync.RWMutex
 	wg             sync.WaitGroup
 	cond           *sync.Cond
@@ -22,19 +23,24 @@ type Executor struct {
 
 type ExecutorOptions struct {
 	WorkersLimit int
+	UpdatesChan  chan map[string]any
 }
 
 func NewExecutor(executorOptions *ExecutorOptions) *Executor {
 	if executorOptions == nil {
 		executorOptions = &ExecutorOptions{
 			WorkersLimit: 5,
+			UpdatesChan:  nil,
 		}
+	} else if executorOptions.WorkersLimit == 0 {
+		executorOptions.WorkersLimit = 5
 	}
 	return &Executor{
 		queue:       queue.NewQueue(),
 		activeTasks: make(map[string]int),
 		cond:        sync.NewCond(&sync.Mutex{}),
 		workerChan:  make(chan struct{}, executorOptions.WorkersLimit),
+		updatesChan: executorOptions.UpdatesChan,
 	}
 }
 
@@ -96,6 +102,11 @@ OuterLoop:
 
 		e.mu.Lock()
 		e.activeTasks[task.ID] = task.Duration
+		if e.updatesChan != nil {
+			e.updatesChan <- map[string]any{
+				task.ID: "start",
+			}
+		}
 		e.mu.Unlock()
 
 		e.wg.Add(1)
@@ -123,6 +134,11 @@ func (e *Executor) executeTask(t *task.Task) {
 		e.mu.Lock()
 		e.CountProcessed++
 		delete(e.activeTasks, t.ID)
+		if e.updatesChan != nil {
+			e.updatesChan <- map[string]any{
+				t.ID: "done",
+			}
+		}
 		e.mu.Unlock()
 
 		if e.queue.Len() != 0 {
