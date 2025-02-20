@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"go-parallel_queue/internal/messages"
 	"go-parallel_queue/internal/processing/queue"
 	"go-parallel_queue/internal/processing/task"
 	"log"
@@ -23,14 +24,14 @@ type ExecutorOptions struct {
 	WorkersLimit int
 }
 
-func NewExecutor(queue *queue.Queue, executorOptions *ExecutorOptions) *Executor {
+func NewExecutor(executorOptions *ExecutorOptions) *Executor {
 	if executorOptions == nil {
 		executorOptions = &ExecutorOptions{
 			WorkersLimit: 5,
 		}
 	}
 	return &Executor{
-		queue:       queue,
+		queue:       queue.NewQueue(),
 		activeTasks: make(map[string]bool),
 		cond:        sync.NewCond(&sync.Mutex{}),
 		workerChan:  make(chan struct{}, executorOptions.WorkersLimit),
@@ -41,14 +42,14 @@ func (e *Executor) PlanTasks(tasks ...*task.Task) {
 	e.queue.Append(tasks...)
 }
 
+func (e *Executor) PlannedTasks() []*task.Task {
+	return e.queue.Tasks()
+}
+
 func (e *Executor) ActiveTasks() map[string]bool {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 	return e.activeTasks
-}
-
-func (e *Executor) PlannedTasks() []*task.Task {
-	return e.queue.Tasks()
 }
 
 func (e *Executor) Notify() {
@@ -101,11 +102,13 @@ OuterLoop:
 		go e.executeTask(task)
 	}
 
-	log.Println("Waiting for workers to finish tasks...")
-	e.wg.Wait()
-	log.Printf("Workers: done. Count processed: %d\n", e.CountProcessed)
+	log.Println(messages.WaitForWorkers)
 
-	log.Println("Executor: done. Shutdown")
+	e.wg.Wait()
+
+	log.Printf(messages.WorkersDone, e.CountProcessed)
+	log.Println(messages.ExecutorDoneShutdown)
+
 	callerWg.Done()
 }
 
@@ -129,7 +132,7 @@ func (e *Executor) executeTask(t *task.Task) {
 		e.wg.Done()
 	}()
 
-	log.Printf("START: %s\n", t.ID)
+	log.Printf(messages.ExecuteStart, t.ID)
 	time.Sleep(time.Duration(t.Duration) * time.Millisecond)
-	log.Printf("DONE: %s\n", t.ID)
+	log.Printf(messages.ExecuteDone, t.ID)
 }
