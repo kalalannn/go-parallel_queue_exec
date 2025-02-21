@@ -25,9 +25,11 @@ func (r *Routes) RESTRoutes() {
 }
 
 func (r *Routes) HTMLRoutes() {
+	r.resolver.UseHTML = true
 	r.app.Get("/", r.resolver.HomeResolver)
 }
 
 func (r *Routes) WSRoutes() {
+	r.resolver.UseWs = true
 	r.app.Get("/ws", websocket.New(r.resolver.WebSocketResolver))
 }

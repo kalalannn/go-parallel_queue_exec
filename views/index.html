@@ -4,6 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
     <script src="/static/js/main.js"></script>
+    {{if .WithWs}}
+    <script src="/static/js/websocket.js"></script>
+    {{end}}
     <link rel="stylesheet" href="/static/css/main.css">
     <title>Home</title>
 </head>

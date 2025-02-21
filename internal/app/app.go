@@ -80,7 +80,11 @@ func (a *App) setupHTMLWsApp() {
 }
 
 func (a *App) setupHTMLApp() {
-	app := fiber.New()
+	engine := html.New("./views", ".html")
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
+	app.Static("/static", "./public")
 
 	a.execService = services.NewExecutorService(nil)
 

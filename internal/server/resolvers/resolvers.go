@@ -14,6 +14,8 @@ const wsTimeout = 2 * time.Second
 
 type Resolver struct {
 	execService *services.ExecutorService
+	UseWs       bool
+	UseHTML     bool
 }
 
 func NewResolver(execService *services.ExecutorService) *Resolver {
@@ -23,7 +25,9 @@ func NewResolver(execService *services.ExecutorService) *Resolver {
 }
 
 func (r *Resolver) HomeResolver(c *fiber.Ctx) error {
-	return c.Render("index", fiber.Map{})
+	return c.Render("index", fiber.Map{
+		"WithWs": r.UseWs,
+	})
 }
 
 func (r *Resolver) WebSocketResolver(c *websocket.Conn) {
