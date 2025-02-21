@@ -59,7 +59,23 @@ document.addEventListener('DOMContentLoaded', function() {
         plannedTasksList.appendChild(createTaskItem(task.ID, task.Duration, 'planned'));
     }
 
+    function nextPlanned(task) {
+        const taskItem = document.getElementById(task.ID);
+        if (taskItem) {
+            // change class
+            taskItem.classList.remove('planned');
+            taskItem.classList.add('next');
+        }
+    }
+
     function moveToActive(task) {
+        // Remove the "last-started" class from the last started task
+        const lastStarted = document.querySelector('.last-started');
+        if (lastStarted) {
+            lastStarted.classList.remove('last-started');
+            lastStarted.classList.add('active');
+        }
+
         // Check if the task is in planned and move it to active
         const taskItem = document.getElementById(task.ID);
         if (taskItem) {
@@ -67,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
             plannedTasksList.removeChild(taskItem);
             // Add it to active
             taskItem.classList.remove('planned');
-            taskItem.classList.add('active');
+            taskItem.classList.add('last-started');
             activeTasksList.appendChild(taskItem);
         }
     }
@@ -81,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     window.addToPlanned = addToPlanned;
+    window.nextPlanned = nextPlanned;
     window.moveToActive = moveToActive;
     window.removeFromActive = removeFromActive;
 });

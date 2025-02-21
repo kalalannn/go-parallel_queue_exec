@@ -22,7 +22,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Received message from server:', message);
 
         if (message.hasOwnProperty('schedule')) {
-            window.addToPlanned(message.schedule);
+            message.schedule.forEach(task => {
+                window.addToPlanned(task);
+            });
+        } else if (message.hasOwnProperty('next')) {
+            window.nextPlanned(message.next);
         } else if (message.hasOwnProperty('start')) {
             window.moveToActive(message.start);
         } else if (message.hasOwnProperty('done')) {

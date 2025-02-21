@@ -10,17 +10,67 @@ body {
 
 .container {
     display: flex;
-    justify-content: space-between;
-    width: 80%;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
+    width: 80%;
+}
+
+.new-tasks {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.tasks-container {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.new-tasks h2 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+input {
+    width: 90%;
+    padding: 5px;
+    font-size: 16px;
 }
 
 .tasks-list {
     background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     padding: 15px;
     width: 45%;
+    margin-bottom: 20px;
 }
 
 .tasks-list h2 {
@@ -37,33 +87,57 @@ body {
     margin: 8px 0;
     padding: 8px;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.tasks-list li span {
-    font-weight: bold;
-}
-
-#activeTasks {
-    list-style-type: none;
-    padding: 0;
-}
-
-#plannedTasks {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    padding: 10px;
-    margin: 5px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     font-size: 16px;
     font-weight: bold;
+}
+
+button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
     border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+#addTask {
+    padding: 10px 50px;
+    background-color: #007bff;
+    color: white;
+}
+
+#addTask:hover {
+    background-color: #0056b3;
+}
+
+#taskForm button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+}
+
+#taskForm button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.removeTask {
+    color: white;
+}
+
+.removeTask:hover {
+    background-color: #f1707d;
 }
 
 .planned {
     background-color: #7EC8E8;  /* Blue for planned tasks */
+}
+
+.next {
+    background-color: #FFD700;  /* Yellow for next tasks */
+}
+
+.last-started {
+    background-color: #FFA500;  /* Orange for last started tasks */
 }
 
 .active {

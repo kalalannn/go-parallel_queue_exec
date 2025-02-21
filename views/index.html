@@ -12,20 +12,54 @@
 </head>
 <body>
     <div class="container">
-        <!-- Active Tasks Section -->
-        <div class="tasks-list" id="activeTasksSection">
-            <h2>Active Tasks</h2>
-            <ul id="activeTasks">
-                <!-- Active tasks will be dynamically inserted here -->
-            </ul>
+        <div class="new-tasks" id="newTasksSection">
+            <h2>New Tasks</h2>
+            <form id="taskForm">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Duration (ms)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTableBody">
+                        <tr class="task-row">
+                            <td>
+                                <input type="text" name="taskID" placeholder="Enter task ID">
+                            </td>
+                            <td>
+                                <input type="number" name="taskDuration" placeholder="Enter task duration(ms)">
+                            </td>
+                            <td>
+                                <button type="button" class="removeTask">❌</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <button type="button" id="addTask">Add Task</button>
+                            </td>
+                            <td>
+                                <button type="submit">Submit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
         </div>
-
-        <!-- Planned Tasks (Queue) Section -->
-        <div class="tasks-list" id="plannedTasksSection">
-            <h2>Planned Tasks (Queue)</h2>
-            <ul id="plannedTasks">
-                <!-- Planned tasks will be dynamically inserted here -->
-            </ul>
+    
+        <div class="tasks-container">
+            <!-- Active Tasks Section -->
+            <div class="tasks-list" id="activeTasksSection">
+                <h2>Active Tasks</h2>
+                <ul id="activeTasks"></ul>
+            </div>
+    
+            <!-- Planned Tasks (Queue) Section -->
+            <div class="tasks-list" id="plannedTasksSection">
+                <h2>Planned Tasks (Queue)</h2>
+                <ul id="plannedTasks"></ul>
+            </div>
         </div>
     </div>
 </body>

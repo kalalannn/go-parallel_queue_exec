@@ -166,8 +166,13 @@ func (s *ExecutorService) PlannedTasks() []map[string]int {
 }
 
 func (s *ExecutorService) PlanExecuteTasks(data map[string]int) {
+	count := len(data)
+	tasks := make([]*task.Task, count)
+	i := 0
 	for k, v := range data {
-		s.exec.PlanTasks(task.NewTask(k, v))
+		tasks[i] = task.NewTask(k, v)
+		i++
 	}
+	s.exec.PlanTasks(tasks...)
 	s.exec.Notify()
 }

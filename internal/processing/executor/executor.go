@@ -46,13 +46,10 @@ func NewExecutor(executorOptions *ExecutorOptions) *Executor {
 
 func (e *Executor) PlanTasks(tasks ...*task.Task) {
 	e.queue.Append(tasks...)
-	e.mu.Lock()
-	defer e.mu.Unlock()
+
 	if e.updatesChan != nil {
-		for _, t := range tasks {
-			e.updatesChan <- map[string]any{
-				"schedule": t,
-			}
+		e.updatesChan <- map[string]any{
+			"schedule": tasks,
 		}
 	}
 }
@@ -107,16 +104,23 @@ OuterLoop:
 		}
 		e.cond.L.Unlock()
 
+		if e.updatesChan != nil {
+			e.updatesChan <- map[string]any{
+				"next": task,
+			}
+		}
+
 		e.workerChan <- struct{}{}
 
 		e.mu.Lock()
 		e.activeTasks[task.ID] = task.Duration
+		e.mu.Unlock()
+
 		if e.updatesChan != nil {
 			e.updatesChan <- map[string]any{
 				"start": task,
 			}
 		}
-		e.mu.Unlock()
 
 		e.wg.Add(1)
 		go e.executeTask(task)
@@ -143,12 +147,13 @@ func (e *Executor) executeTask(t *task.Task) {
 		e.mu.Lock()
 		e.CountProcessed++
 		delete(e.activeTasks, t.ID)
+		e.mu.Unlock()
+
 		if e.updatesChan != nil {
 			e.updatesChan <- map[string]any{
 				"done": t,
 			}
 		}
-		e.mu.Unlock()
 
 		if e.queue.Len() != 0 {
 			e.Notify()
