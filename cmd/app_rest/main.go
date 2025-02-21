@@ -6,7 +6,9 @@ import (
 )
 
 func main() {
-	if err := app.Run(); err != nil {
+	a := app.NewApp(&app.AppOptions{WithHTML: false, WithWs: false})
+	a.SetupApp()
+	if err := a.Run(); err != nil {
 		log.Fatalf("Fatal error: %s", err)
 	}
 }

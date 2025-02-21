@@ -23,40 +23,57 @@ type ExecutorService struct {
 
 type ExecutorServiceOptions struct {
 	WorkersLimit int
+	UseWs        bool
 }
 
 func NewExecutorService(opts *ExecutorServiceOptions) *ExecutorService {
-	var exec *executor.Executor
-	wsUpdateChan := make(chan map[string]any)
-
 	if opts == nil {
-		exec = executor.NewExecutor(&executor.ExecutorOptions{
-			UpdatesChan: wsUpdateChan,
-		})
-	} else {
+		opts = &ExecutorServiceOptions{
+			WorkersLimit: 5,
+			UseWs:        false,
+		}
+	} else if opts.WorkersLimit == 0 {
+		opts.WorkersLimit = 5
+	}
+
+	ourWg := sync.WaitGroup{}
+
+	var exec *executor.Executor
+	var execService ExecutorService
+	if opts.UseWs {
+		wsUpdateChan := make(chan map[string]any)
 		exec = executor.NewExecutor(&executor.ExecutorOptions{
 			WorkersLimit: opts.WorkersLimit,
 			UpdatesChan:  wsUpdateChan,
 		})
+
+		execService = ExecutorService{
+			exec:          exec,
+			ourWg:         &ourWg,
+			wsClients:     make(map[*websocket.Conn]bool),
+			wsUpdateChan:  wsUpdateChan,
+			stopBroadcast: make(chan struct{}),
+			broadcastDone: make(chan struct{}),
+		}
+
+		ourWg.Add(1)
+		go execService.BroadcastUpdates()
+
+	} else {
+		exec = executor.NewExecutor(&executor.ExecutorOptions{
+			WorkersLimit: opts.WorkersLimit,
+		})
+
+		execService = ExecutorService{
+			exec:  exec,
+			ourWg: &ourWg,
+		}
 	}
 
-	ourWg := sync.WaitGroup{}
 	ourWg.Add(1)
 	go exec.Execute(&ourWg)
 
-	s := ExecutorService{
-		exec:          exec,
-		ourWg:         &ourWg,
-		wsClients:     make(map[*websocket.Conn]bool),
-		wsUpdateChan:  wsUpdateChan,
-		stopBroadcast: make(chan struct{}),
-		broadcastDone: make(chan struct{}),
-	}
-
-	ourWg.Add(1)
-	go s.BroadcastUpdates()
-
-	return &s
+	return &execService
 }
 
 func (s *ExecutorService) AddWebSocketClient(client *websocket.Conn) {

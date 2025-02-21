@@ -17,50 +17,144 @@ import (
 const FiberShutdownTimeout = 1 * time.Second
 const ExecutorShutdownTimeout = 5 * time.Second
 
-func Run() error {
+type App struct {
+	app         *fiber.App
+	execService *services.ExecutorService
+	sigChan     chan os.Signal
+	withHTML    bool
+	withWs      bool
+}
+
+type AppOptions struct {
+	WithHTML bool
+	WithWs   bool
+}
+
+func NewApp(opts *AppOptions) *App {
 	log.SetFlags(log.Ltime)
+
+	if opts == nil {
+		opts = &AppOptions{
+			WithHTML: true,
+			WithWs:   true,
+		}
+	}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
+	return &App{
+		sigChan:  sigChan,
+		withHTML: opts.WithHTML,
+		withWs:   opts.WithWs,
+	}
+}
+
+func (a *App) SetupApp() {
+	if a.withHTML && a.withWs {
+		a.setupHTMLWsApp()
+	} else if a.withHTML {
+		a.setupHTMLApp()
+	} else if a.withWs {
+		a.setupWsApp()
+	} else {
+		a.setupRESTApp()
+	}
+}
+
+func (a *App) setupHTMLWsApp() {
 	engine := html.New("./views", ".html")
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
-
 	app.Static("/static", "./public")
 
-	execService := services.NewExecutorService(nil)
-	r := resolvers.NewResolver(execService)
+	a.execService = services.NewExecutorService(&services.ExecutorServiceOptions{UseWs: true})
 
-	routes.SetupRoutes(app, r)
+	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
+	routes.RESTRoutes()
+	routes.HTMLRoutes()
+	routes.WSRoutes()
 
+	a.app = app
+}
+
+func (a *App) setupHTMLApp() {
+	app := fiber.New()
+
+	a.execService = services.NewExecutorService(nil)
+
+	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
+	routes.RESTRoutes()
+	routes.HTMLRoutes()
+
+	a.app = app
+}
+
+func (a *App) setupWsApp() {
+	app := fiber.New()
+
+	a.execService = services.NewExecutorService(&services.ExecutorServiceOptions{UseWs: true})
+
+	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
+	routes.RESTRoutes()
+	routes.WSRoutes()
+
+	a.app = app
+}
+
+func (a *App) setupRESTApp() {
+	app := fiber.New()
+
+	a.execService = services.NewExecutorService(nil)
+
+	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
+	routes.RESTRoutes()
+
+	a.app = app
+}
+
+func (a *App) Run() error {
 	serverShutdown := make(chan struct{})
 
 	go func() {
-		<-sigChan
-		log.Println(messages.StartShutdownServer)
-
-		execService.ShutdownBroadcast()
-
-		log.Println(messages.StartShutdownFiber)
-		app.ShutdownWithTimeout(FiberShutdownTimeout)
+		<-a.sigChan
+		a.shutdownFiber()
 		serverShutdown <- struct{}{}
 	}()
 
-	err := app.Listen(":8080")
+	err := a.app.Listen(":8080")
 
 	<-serverShutdown
-	log.Println(messages.EndShutdownFiber)
+	a.cleanup()
 
+	return err
+}
+
+func (a *App) shutdownFiber() {
+	log.Println(messages.StartShutdownServer)
+
+	// shutdown broadcast if for WebSocket
+	if a.withWs {
+		a.execService.ShutdownBroadcast()
+	}
+
+	log.Println(messages.StartShutdownFiber)
+
+	// shutdown fiber
+	a.app.ShutdownWithTimeout(FiberShutdownTimeout)
+}
+
+func (a *App) cleanup() {
+	log.Println(messages.EndShutdownFiber)
 	log.Println(messages.StartShutdownExecutorService)
 
-	serviceRet := execService.ShutdownWithTimeout(ExecutorShutdownTimeout)
+	// shutdown executor
+	serviceRet := a.execService.ShutdownWithTimeout(ExecutorShutdownTimeout)
+
 	if serviceRet {
 		log.Println(messages.EndShutdownExecutorServiceSuccess)
 	} else {
 		log.Println(messages.EndShutdownExecutorServiceTimeout)
 	}
-
-	return err
 }
