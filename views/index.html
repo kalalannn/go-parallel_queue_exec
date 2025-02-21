@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/static/img/favicon.ico" type="image/x-icon">
     <script src="/static/js/main.js"></script>
+    <script src="/static/js/add_tasks.js"></script>
     {{if .WithWs}}
     <script src="/static/js/websocket.js"></script>
     {{end}}
@@ -24,17 +25,7 @@
                         </tr>
                     </thead>
                     <tbody id="taskTableBody">
-                        <tr class="task-row">
-                            <td>
-                                <input type="text" name="taskID" placeholder="Enter task ID">
-                            </td>
-                            <td>
-                                <input type="number" name="taskDuration" placeholder="Enter task duration(ms)">
-                            </td>
-                            <td>
-                                <button type="button" class="removeTask">❌</button>
-                            </td>
-                        </tr>
+                        <!-- New tasks will be added here -->
                         <tr>
                             <td colspan="2">
                                 <button type="button" id="addTask">Add Task</button>
@@ -61,6 +52,7 @@
                 <ul id="plannedTasks"></ul>
             </div>
         </div>
+    <div class="placeholder"></div>
     </div>
 </body>
 </html>

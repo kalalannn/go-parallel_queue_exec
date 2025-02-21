@@ -5,4 +5,4 @@ build: _mkdir_bin
 run: build
 	./bin/app_html_ws
 run_daemon:
-	CompileDaemon -build="make build" -command="make run"
+	CompileDaemon -build="make build" -command="make run" -pattern "(.+\\.go|.+\\.html|.+\\.css|.+\\.js)"
