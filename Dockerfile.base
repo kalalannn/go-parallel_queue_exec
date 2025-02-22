@@ -1,0 +1,16 @@
+ARG CORE_IMAGE=go-parallel_queue_exec-core:latest
+FROM ${CORE_IMAGE} AS base
+
+COPY cmd ./cmd/
+COPY config ./config/
+COPY internal ./internal/
+COPY pkg ./pkg/
+
+RUN go test ./...
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/app_rest    cmd/app_rest/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/app_html    cmd/app_html/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/app_ws      cmd/app_ws/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/app_html_ws cmd/app_html_ws/main.go
+
+RUN apk add --no-cache bash

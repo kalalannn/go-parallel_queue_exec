@@ -1,0 +1,12 @@
+ARG BASE_IMAGE=go-parallel_queue_exec-base:latest
+FROM ${BASE_IMAGE} AS builder
+
+FROM scratch
+
+WORKDIR /bin
+COPY --from=builder /bin/app_rest /bin/app_rest
+COPY --from=builder /src/config /bin/config
+
+EXPOSE 8080
+
+ENTRYPOINT ["/bin/app_rest"]

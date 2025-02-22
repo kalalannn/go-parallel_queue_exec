@@ -1,0 +1,7 @@
+ARG GOLANG_IMAGE=golang:1.23-alpine
+FROM ${GOLANG_IMAGE} AS core
+
+WORKDIR /src
+COPY go.mod go.sum ./
+
+RUN go mod download && go mod verify

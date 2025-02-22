@@ -1,0 +1,14 @@
+ARG BASE_IMAGE=go-parallel_queue_exec-base:latest
+FROM ${BASE_IMAGE} AS builder
+
+FROM scratch
+
+WORKDIR /bin
+COPY --from=builder /bin/app_html_ws /bin/app_html_ws
+COPY --from=builder /src/config /bin/config
+COPY public /bin/public
+COPY views /bin/views
+
+EXPOSE 8080
+
+ENTRYPOINT ["/bin/app_html_ws"]
