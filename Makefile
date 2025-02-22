@@ -114,10 +114,10 @@ stop_app_html_ws_image:
 	@docker kill --signal=SIGINT ${APP_HTML_WS_CONTAINER_NAME}
 
 stop_all:
-	@make stop_app_rest    2> /dev/null || true
-	@make stop_app_ws      2> /dev/null || true
-	@make stop_app_html    2> /dev/null || true
-	@make stop_app_html_ws 2> /dev/null || true
+	@make stop_app_rest    || true
+	@make stop_app_ws      || true
+	@make stop_app_html    || true
+	@make stop_app_html_ws || true
 
 #! Stop and remove docker images
 stop_rm_app_rest: stop_app_rest_image
@@ -141,7 +141,7 @@ stop_rm_app_html_ws: stop_app_html_ws_image
 	@docker rm ${APP_HTML_WS_CONTAINER_NAME}
 
 stop_rm_all:
-	@make stop_rm_app_rest    2> /dev/null || true
-	@make stop_rm_app_ws      2> /dev/null || true
-	@make stop_rm_app_html    2> /dev/null || true
-	@make stop_rm_app_html_ws 2> /dev/null || true
+	@make stop_rm_app_rest    || true
+	@make stop_rm_app_ws      || true
+	@make stop_rm_app_html    || true
+	@make stop_rm_app_html_ws || true
