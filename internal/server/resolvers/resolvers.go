@@ -4,13 +4,26 @@ import (
 	"go-parallel_queue/internal/messages"
 	"go-parallel_queue/internal/server/services"
 	"log"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 )
 
-const wsTimeout = 2 * time.Second
+const restAccepts = "application/json"
+
+const (
+	wsMessageTag   = "message"
+	restMessageTag = "message"
+	restErrorTag   = "error"
+)
+const (
+	tasksActiveTag  = "active"
+	tasksPlannedTag = "planned"
+)
+const (
+	wsReadErrorMsg  = "Read error: "
+	wsWriteErrorMsg = "Write error: "
+)
 
 type Resolver struct {
 	execService *services.ExecutorService
@@ -36,27 +49,26 @@ func (r *Resolver) WebSocketResolver(c *websocket.Conn) {
 	r.execService.AddWebSocketClient(c)
 	defer r.execService.RemoveWebSocketClient(c)
 
-	_, msg, err := c.ReadMessage()
+	_, _, err := c.ReadMessage()
 	if err != nil {
-		log.Println("Read error:", err)
+		log.Println(wsReadErrorMsg, err)
 		return
 	}
 
-	if err := c.WriteJSON(map[string]string{"message": messages.WelcomeMessage}); err != nil {
-		log.Println("Write error:", err)
+	if err := c.WriteJSON(map[string]string{wsMessageTag: messages.WelcomeMessage}); err != nil {
+		log.Println(wsWriteErrorMsg, err)
 		return
 	}
 
 	for {
 		_, _, err := c.ReadMessage()
 		if err != nil {
-			log.Println("Read error:", err)
+			log.Println(wsReadErrorMsg, err)
 			return
 		}
-		_ = msg
 
-		if err := c.WriteJSON(map[string]string{"message": messages.UseRESTMessage}); err != nil {
-			log.Println("Write error:", err)
+		if err := c.WriteJSON(map[string]string{wsMessageTag: messages.UseRESTMessage}); err != nil {
+			log.Println(wsWriteErrorMsg, err)
 			return
 		}
 	}
@@ -64,23 +76,23 @@ func (r *Resolver) WebSocketResolver(c *websocket.Conn) {
 
 func (r *Resolver) TasksResolver(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"active":  r.execService.ActiveTasks(),
-		"planned": r.execService.PlannedTasks(),
+		tasksActiveTag:  r.execService.ActiveTasks(),
+		tasksPlannedTag: r.execService.PlannedTasks(),
 	})
 }
 
 func (r *Resolver) PlanResolver(c *fiber.Ctx) error {
-	c.Accepts("application/json")
+	c.Accepts(restAccepts)
 	var data map[string]int
 	if err := c.BodyParser(&data); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": messages.InvalidJSON,
+			restErrorTag: messages.InvalidJSON,
 		})
 	}
 
 	r.execService.PlanExecuteTasks(data)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": messages.OK,
+		restMessageTag: messages.OK,
 	})
 }

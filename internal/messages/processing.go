@@ -1,8 +1,19 @@
 package messages
 
-const WaitForWorkers = "Waiting for workers to finish tasks..."
-const WorkersDone = "Workers done, count processed: %d\n"
-const ExecutorDoneShutdown = "Executor done, shutting down..."
+const (
+	ExecuteStart = "START: %s\n"
+	ExecuteDone  = "DONE: %s\n"
+)
 
-const ExecuteStart = "START: %s\n"
-const ExecuteDone = "DONE: %s\n"
+const (
+	ScheduleTag = "schedule"
+	NextTag     = "next"
+	StartTag    = "start"
+	DoneTag     = "done"
+)
+
+const (
+	WaitForWorkers       = "Waiting for workers to finish tasks..."
+	WorkersDone          = "Workers done, count processed: %d\n"
+	ExecutorDoneShutdown = "Executor done, shutting down..."
+)

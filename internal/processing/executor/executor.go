@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const defaultWorkersLimit = 5
+
 type Executor struct {
 	queue          *queue.Queue
 	activeTasks    map[string]int
@@ -29,11 +31,11 @@ type ExecutorOptions struct {
 func NewExecutor(executorOptions *ExecutorOptions) *Executor {
 	if executorOptions == nil {
 		executorOptions = &ExecutorOptions{
-			WorkersLimit: 5,
+			WorkersLimit: defaultWorkersLimit,
 			UpdatesChan:  nil,
 		}
 	} else if executorOptions.WorkersLimit == 0 {
-		executorOptions.WorkersLimit = 5
+		executorOptions.WorkersLimit = defaultWorkersLimit
 	}
 	return &Executor{
 		queue:       queue.NewQueue(),
@@ -49,7 +51,7 @@ func (e *Executor) PlanTasks(tasks ...*task.Task) {
 
 	if e.updatesChan != nil {
 		e.updatesChan <- map[string]any{
-			"schedule": tasks,
+			messages.ScheduleTag: tasks,
 		}
 	}
 }
@@ -106,7 +108,7 @@ OuterLoop:
 
 		if e.updatesChan != nil {
 			e.updatesChan <- map[string]any{
-				"next": task,
+				messages.NextTag: task,
 			}
 		}
 
@@ -118,7 +120,7 @@ OuterLoop:
 
 		if e.updatesChan != nil {
 			e.updatesChan <- map[string]any{
-				"start": task,
+				messages.StartTag: task,
 			}
 		}
 
@@ -151,7 +153,7 @@ func (e *Executor) executeTask(t *task.Task) {
 
 		if e.updatesChan != nil {
 			e.updatesChan <- map[string]any{
-				"done": t,
+				messages.DoneTag: t,
 			}
 		}
 

@@ -1,0 +1,12 @@
+app:
+  host: 0.0.0.0
+  port: 8080
+  static_endpoint: /static
+  public_folder: ./public
+  views_folder: ./views
+  templates_ext: .html
+  fiber_shutdown_timeout_ms: 1000
+  executor_shutdown_timeout_ms: 5000
+
+executor_service:
+  workers_limit: 5

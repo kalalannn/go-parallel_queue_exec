@@ -11,6 +11,11 @@ import (
 	"github.com/gofiber/websocket/v2"
 )
 
+const (
+	defaultExecutorWorkersLimit = 5
+	defaultUseWebSockets        = false
+)
+
 type ExecutorService struct {
 	exec          *executor.Executor
 	ourWg         *sync.WaitGroup
@@ -29,11 +34,11 @@ type ExecutorServiceOptions struct {
 func NewExecutorService(opts *ExecutorServiceOptions) *ExecutorService {
 	if opts == nil {
 		opts = &ExecutorServiceOptions{
-			WorkersLimit: 5,
-			UseWs:        false,
+			WorkersLimit: defaultExecutorWorkersLimit,
+			UseWs:        defaultUseWebSockets,
 		}
 	} else if opts.WorkersLimit == 0 {
-		opts.WorkersLimit = 5
+		opts.WorkersLimit = defaultExecutorWorkersLimit
 	}
 
 	ourWg := sync.WaitGroup{}
@@ -80,14 +85,14 @@ func (s *ExecutorService) AddWebSocketClient(client *websocket.Conn) {
 	s.wsMu.Lock()
 	defer s.wsMu.Unlock()
 	s.wsClients[client] = true
-	log.Println("Added new WebSocket client")
+	log.Println(messages.NewWebSocketClient)
 }
 
 func (s *ExecutorService) RemoveWebSocketClient(client *websocket.Conn) {
 	s.wsMu.Lock()
 	defer s.wsMu.Unlock()
 	delete(s.wsClients, client)
-	log.Println("Removed WebSocket client")
+	log.Println(messages.RemoveWebSocketClient)
 }
 
 func (s *ExecutorService) WebSocketClientsCount() int {
@@ -103,14 +108,14 @@ func (s *ExecutorService) BroadcastUpdates() {
 			s.wsMu.RLock()
 			for client := range s.wsClients {
 				if err := client.WriteJSON(update); err != nil {
-					log.Printf("Failed to send update to client: %s, disconnecting\n", err)
+					log.Printf(messages.BroadcastFailed, err)
 					client.Close()
 					s.RemoveWebSocketClient(client)
 				}
 			}
 			s.wsMu.RUnlock()
 		case <-s.stopBroadcast:
-			log.Println("Stopping broadcast updates...")
+			log.Println(messages.StopBroadcastUpdatesStart)
 			for client := range s.wsClients {
 				client.Close()
 				s.RemoveWebSocketClient(client)
@@ -125,7 +130,7 @@ func (s *ExecutorService) BroadcastUpdates() {
 func (s *ExecutorService) ShutdownBroadcast() {
 	s.stopBroadcast <- struct{}{}
 	<-s.broadcastDone
-	log.Println("Broadcast updates stopped.")
+	log.Println(messages.StopBroadcastUpdatesEnd)
 }
 
 func (s *ExecutorService) Shutdown() bool {

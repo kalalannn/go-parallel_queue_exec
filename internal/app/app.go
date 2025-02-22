@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+	"go-parallel_queue/internal/config"
 	"go-parallel_queue/internal/messages"
 	"go-parallel_queue/internal/server/resolvers"
 	"go-parallel_queue/internal/server/routes"
@@ -14,11 +16,9 @@ import (
 	"github.com/gofiber/template/html/v2"
 )
 
-const FiberShutdownTimeout = 1 * time.Second
-const ExecutorShutdownTimeout = 5 * time.Second
-
 type App struct {
 	app         *fiber.App
+	config      *config.Config
 	execService *services.ExecutorService
 	sigChan     chan os.Signal
 	withHTML    bool
@@ -30,8 +30,10 @@ type AppOptions struct {
 	WithWs   bool
 }
 
-func NewApp(opts *AppOptions) *App {
-	log.SetFlags(log.Ltime)
+func NewApp(config *config.Config, opts *AppOptions) *App {
+	if config == nil {
+		log.Fatalln("no config for app")
+	}
 
 	if opts == nil {
 		opts = &AppOptions{
@@ -44,6 +46,7 @@ func NewApp(opts *AppOptions) *App {
 	signal.Notify(sigChan, os.Interrupt)
 
 	return &App{
+		config:   config,
 		sigChan:  sigChan,
 		withHTML: opts.WithHTML,
 		withWs:   opts.WithWs,
@@ -62,14 +65,27 @@ func (a *App) SetupApp() {
 	}
 }
 
-func (a *App) setupHTMLWsApp() {
-	engine := html.New("./views", ".html")
+func (a *App) fiberAppWithHTML() *fiber.App {
+	engine := html.New(a.config.App.ViewsFolder, a.config.App.TemplatesExt)
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
-	app.Static("/static", "./public")
+	app.Static(a.config.App.StaticEndpoint, a.config.App.PublicFolder)
 
-	a.execService = services.NewExecutorService(&services.ExecutorServiceOptions{UseWs: true})
+	return app
+}
+
+func (a *App) newExecService(useWs bool) *services.ExecutorService {
+	return services.NewExecutorService(&services.ExecutorServiceOptions{
+		WorkersLimit: a.config.ExecutorService.WorkersLimit,
+		UseWs:        useWs,
+	})
+}
+
+func (a *App) setupHTMLWsApp() {
+	app := a.fiberAppWithHTML()
+
+	a.execService = a.newExecService(true)
 
 	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
 	routes.RESTRoutes()
@@ -80,13 +96,9 @@ func (a *App) setupHTMLWsApp() {
 }
 
 func (a *App) setupHTMLApp() {
-	engine := html.New("./views", ".html")
-	app := fiber.New(fiber.Config{
-		Views: engine,
-	})
-	app.Static("/static", "./public")
+	app := a.fiberAppWithHTML()
 
-	a.execService = services.NewExecutorService(nil)
+	a.execService = a.newExecService(false)
 
 	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
 	routes.RESTRoutes()
@@ -98,7 +110,7 @@ func (a *App) setupHTMLApp() {
 func (a *App) setupWsApp() {
 	app := fiber.New()
 
-	a.execService = services.NewExecutorService(&services.ExecutorServiceOptions{UseWs: true})
+	a.execService = a.newExecService(true)
 
 	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
 	routes.RESTRoutes()
@@ -110,7 +122,7 @@ func (a *App) setupWsApp() {
 func (a *App) setupRESTApp() {
 	app := fiber.New()
 
-	a.execService = services.NewExecutorService(nil)
+	a.execService = a.newExecService(false)
 
 	routes := routes.NewRoutes(app, resolvers.NewResolver(a.execService))
 	routes.RESTRoutes()
@@ -127,7 +139,7 @@ func (a *App) Run() error {
 		serverShutdown <- struct{}{}
 	}()
 
-	err := a.app.Listen(":8080")
+	err := a.app.Listen(fmt.Sprintf("%s:%d", a.config.App.Host, a.config.App.Port))
 
 	<-serverShutdown
 	a.cleanup()
@@ -146,7 +158,7 @@ func (a *App) shutdownFiber() {
 	log.Println(messages.StartShutdownFiber)
 
 	// shutdown fiber
-	a.app.ShutdownWithTimeout(FiberShutdownTimeout)
+	a.app.ShutdownWithTimeout(time.Duration(a.config.App.FiberShutdownTimeoutMs) * time.Millisecond)
 }
 
 func (a *App) cleanup() {
@@ -154,7 +166,7 @@ func (a *App) cleanup() {
 	log.Println(messages.StartShutdownExecutorService)
 
 	// shutdown executor
-	serviceRet := a.execService.ShutdownWithTimeout(ExecutorShutdownTimeout)
+	serviceRet := a.execService.ShutdownWithTimeout(time.Duration(a.config.App.ExecutorShutdownTimeoutMs) * time.Millisecond)
 
 	if serviceRet {
 		log.Println(messages.EndShutdownExecutorServiceSuccess)
