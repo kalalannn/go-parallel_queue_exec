@@ -9,4 +9,4 @@ app:
   executor_shutdown_timeout_ms: 5000
 
 executor_service:
-  workers_limit: 5
+  workers_limit: 10
