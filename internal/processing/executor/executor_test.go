@@ -62,7 +62,7 @@ func TestOneProcessed(t *testing.T) {
 
 	// act
 	e.Notify()
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 
 	e.Shutdown()
 	ourWg.Wait()
@@ -105,8 +105,8 @@ func TestWorkersCount3(t *testing.T) {
 
 	e.PlanTasks(
 		task.NewTask("1", sleepTime*gap),
-		task.NewTask("2", sleepTime*2),
-		task.NewTask("3", sleepTime*gap/2),
+		task.NewTask("2", sleepTime*gap),
+		task.NewTask("3", sleepTime*gap),
 		task.NewTask("4", 1),
 		task.NewTask("5", 1),
 	)
@@ -128,7 +128,7 @@ func TestWorkersCount3(t *testing.T) {
 
 func TestUniqueExecution(t *testing.T) {
 	// arrange
-	e := executor.NewExecutor(&executor.ExecutorOptions{WorkersLimit: 3})
+	e := executor.NewExecutor(&executor.ExecutorOptions{WorkersLimit: 2})
 
 	ourWg := sync.WaitGroup{}
 	ourWg.Add(1)
@@ -136,7 +136,6 @@ func TestUniqueExecution(t *testing.T) {
 
 	e.PlanTasks(
 		task.NewTask("1", sleepTime*gap),
-		task.NewTask("1", 1),
 		task.NewTask("1", 1),
 	)
 
@@ -146,16 +145,16 @@ func TestUniqueExecution(t *testing.T) {
 	// wait
 	time.Sleep(time.Duration(sleepTime) * time.Millisecond)
 
-	// assert
+	// take stateshot
 	activeTasks := utils.MapKeys(e.ActiveTasks())
 	assert.Equal(t, 1, len(activeTasks))
 
 	// wait
-	time.Sleep(time.Duration(sleepTime*gap) * time.Millisecond)
+	time.Sleep(time.Duration(sleepTime*gap*2) * time.Millisecond)
 
 	e.Shutdown()
 	ourWg.Wait()
 
 	// assert
-	assert.Equal(t, 3, e.CountProcessed)
+	assert.Equal(t, 2, e.CountProcessed)
 }

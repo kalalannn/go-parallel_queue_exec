@@ -86,12 +86,16 @@ _build_app_html_image:
 _build_app_html_ws_image:
 	docker build --file=Dockerfile.app_html_ws --tag=${APP_HTML_WS_IMAGE} .
 
-build_images: _build_core_image _build_base_image _build_app_rest_image _build_app_ws_image _build_app_html_image _build_app_html_ws_image show_images
+build_images: _build_base_image _build_app_rest_image _build_app_ws_image _build_app_html_image _build_app_html_ws_image show_images
 
 build_app_rest_image:    _build_core_image _build_base_image _build_app_rest_image
 build_app_ws_image:      _build_core_image _build_base_image _build_app_ws_image
 build_app_html_image:    _build_core_image _build_base_image _build_app_html_image
 build_app_html_ws_image: _build_core_image _build_base_image _build_app_html_ws_image
+
+#! Run docker tests
+run_tests: _build_base_image
+	docker run --rm --name ${BASE_CONTAINER_NAME} ${BASE_IMAGE} go test ./... -count=3
 
 #! Run docker images
 run_app_rest_image: build_app_rest_image
