@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify(taskData)
         })
         .then(response => response.json())
-        .then(data => console.log("Server response:", data))
+        // .then(data => console.log("Server response:", data))
         .catch(error => console.error("Error:", error));
     });
 

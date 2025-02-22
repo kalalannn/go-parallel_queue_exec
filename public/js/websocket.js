@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     socket.onmessage = function(event) {
         const message = JSON.parse(event.data);
-        console.log('Received message from server:', message);
+        // console.log('Received message from server:', message);
 
         if (message.hasOwnProperty('schedule')) {
             message.schedule.forEach(task => {
