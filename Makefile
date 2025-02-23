@@ -27,6 +27,10 @@ local_build_app_ws:      _mkdir_bin _local_build_app_ws
 local_build_app_html:    _mkdir_bin _local_build_app_html
 local_build_app_html_ws: _mkdir_bin _local_build_app_html_ws
 
+#! Local tests
+local_tests:
+	go test ./... -count=3
+
 #! Local runs
 _local_run_app_rest:
 	${BIN_APP_REST}
@@ -108,13 +112,13 @@ run_app_html_ws_image: build_app_html_ws_image
 	docker run -d -p 8080:8080 --name ${APP_HTML_WS_CONTAINER_NAME} ${APP_HTML_WS_IMAGE}
 
 #! Stop docker images
-stop_app_rest_image:
+stop_app_rest:
 	@docker kill --signal=SIGINT ${APP_REST_CONTAINER_NAME}
-stop_app_ws_image:
+stop_app_ws:
 	@docker kill --signal=SIGINT ${APP_WS_CONTAINER_NAME}
-stop_app_html_image:
+stop_app_html:
 	@docker kill --signal=SIGINT ${APP_HTML_CONTAINER_NAME}
-stop_app_html_ws_image:
+stop_app_html_ws:
 	@docker kill --signal=SIGINT ${APP_HTML_WS_CONTAINER_NAME}
 
 stop_all:
