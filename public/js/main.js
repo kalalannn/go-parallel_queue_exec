@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const tasksUrl = "/tasks";
     const activeTasksList = document.getElementById('activeTasks');
-    const plannedTasksList = document.getElementById('plannedTasks');
+    const scheduledTasksList = document.getElementById('scheduledTasks');
 
     fetchTasks();
 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const data = await response.json();
             renderActiveTasks(data.active);
-            renderPlannedTasks(data.planned);
+            renderScheduledTasks(data.scheduled);
         } catch (error) {
             console.error('Error fetching tasks:', error);
         }
@@ -51,19 +51,19 @@ document.addEventListener('DOMContentLoaded', function() {
         renderTasks(activeTasksList, activeTasks, 'active');
     }
 
-    function renderPlannedTasks(plannedTasks) {
-        renderTasks(plannedTasksList, plannedTasks, 'planned');
+    function renderScheduledTasks(scheduledTasks) {
+        renderTasks(scheduledTasksList, scheduledTasks, 'scheduled');
     }
 
-    function addToPlanned(task) {
-        plannedTasksList.appendChild(createTaskItem(task.ID, task.Duration, 'planned'));
+    function addToScheduled(task) {
+        scheduledTasksList.appendChild(createTaskItem(task.ID, task.Duration, 'scheduled'));
     }
 
-    function nextPlanned(task) {
+    function nextScheduled(task) {
         const taskItem = document.getElementById(task.ID);
         if (taskItem) {
             // change class
-            taskItem.classList.remove('planned');
+            taskItem.classList.remove('scheduled');
             taskItem.classList.add('next');
         }
     }
@@ -76,13 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
             lastStarted.classList.add('active');
         }
 
-        // Check if the task is in planned and move it to active
+        // Check if the task is in scheduled and move it to active
         const taskItem = document.getElementById(task.ID);
         if (taskItem) {
-            // Remove it from planned
-            plannedTasksList.removeChild(taskItem);
+            // Remove it from scheduled
+            scheduledTasksList.removeChild(taskItem);
             // Add it to active
-            taskItem.classList.remove('planned');
+            taskItem.classList.remove('scheduled');
             taskItem.classList.add('last-started');
             activeTasksList.appendChild(taskItem);
         }
@@ -96,8 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.addToPlanned = addToPlanned;
-    window.nextPlanned = nextPlanned;
+    window.addToScheduled = addToScheduled;
+    window.nextScheduled = nextScheduled;
     window.moveToActive = moveToActive;
     window.removeFromActive = removeFromActive;
 });

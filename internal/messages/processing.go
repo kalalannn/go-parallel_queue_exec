@@ -6,10 +6,10 @@ const (
 )
 
 const (
-	ScheduleTag = "schedule"
-	NextTag     = "next"
-	StartTag    = "start"
-	DoneTag     = "done"
+	ScheduledTag = "scheduled"
+	NextTag      = "next"
+	StartTag     = "start"
+	DoneTag      = "done"
 )
 
 const (

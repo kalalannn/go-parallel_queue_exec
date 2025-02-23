@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        fetch("/plan", {
+        fetch("/schedule", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(taskData)

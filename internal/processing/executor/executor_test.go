@@ -38,7 +38,7 @@ func TestShutdownFasterThanOne(t *testing.T) {
 	ourWg.Add(1)
 	go e.Execute(&ourWg)
 
-	e.PlanTasks(task.NewTask("1", 1))
+	e.ScheduleTasks(task.NewTask("1", 1))
 
 	// act
 	e.Notify()
@@ -58,7 +58,7 @@ func TestOneProcessed(t *testing.T) {
 	ourWg.Add(1)
 	go e.Execute(&ourWg)
 
-	e.PlanTasks(task.NewTask("1", 1))
+	e.ScheduleTasks(task.NewTask("1", 1))
 
 	// act
 	e.Notify()
@@ -80,7 +80,7 @@ func TestNobodyBlocked(t *testing.T) {
 	ourWg.Add(1)
 	go e.Execute(&ourWg)
 
-	e.PlanTasks(task.NewTask("1", 15))
+	e.ScheduleTasks(task.NewTask("1", 15))
 
 	// act
 	e.Notify()
@@ -103,7 +103,7 @@ func TestWorkersCount3(t *testing.T) {
 	ourWg.Add(1)
 	go e.Execute(&ourWg)
 
-	e.PlanTasks(
+	e.ScheduleTasks(
 		task.NewTask("1", sleepTime*gap),
 		task.NewTask("2", sleepTime*gap),
 		task.NewTask("3", sleepTime*gap),
@@ -134,7 +134,7 @@ func TestUniqueExecution(t *testing.T) {
 	ourWg.Add(1)
 	go e.Execute(&ourWg)
 
-	e.PlanTasks(
+	e.ScheduleTasks(
 		task.NewTask("1", sleepTime*gap),
 		task.NewTask("1", 1),
 	)

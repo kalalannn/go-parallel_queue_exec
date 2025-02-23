@@ -21,7 +21,7 @@ func NewRoutes(app *fiber.App, resolver *resolvers.Resolver) *Routes {
 
 func (r *Routes) RESTRoutes() {
 	r.app.Get("/tasks", r.resolver.TasksResolver)
-	r.app.Post("/plan", r.resolver.PlanResolver)
+	r.app.Post("/schedule", r.resolver.ScheduleResolver)
 }
 
 func (r *Routes) HTMLRoutes() {

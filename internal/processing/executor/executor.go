@@ -46,17 +46,17 @@ func NewExecutor(executorOptions *ExecutorOptions) *Executor {
 	}
 }
 
-func (e *Executor) PlanTasks(tasks ...*task.Task) {
+func (e *Executor) ScheduleTasks(tasks ...*task.Task) {
 	e.queue.Append(tasks...)
 
 	if e.updatesChan != nil {
 		e.updatesChan <- map[string]any{
-			messages.ScheduleTag: tasks,
+			messages.ScheduledTag: tasks,
 		}
 	}
 }
 
-func (e *Executor) PlannedTasks() []*task.Task {
+func (e *Executor) ScheduledTasks() []*task.Task {
 	return e.queue.Tasks()
 }
 

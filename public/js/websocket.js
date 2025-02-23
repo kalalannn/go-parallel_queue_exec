@@ -21,12 +21,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = JSON.parse(event.data);
         // console.log('Received message from server:', message);
 
-        if (message.hasOwnProperty('schedule')) {
-            message.schedule.forEach(task => {
-                window.addToPlanned(task);
+        if (message.hasOwnProperty('scheduled')) {
+            message.scheduled.forEach(task => {
+                window.addToScheduled(task);
             });
         } else if (message.hasOwnProperty('next')) {
-            window.nextPlanned(message.next);
+            window.nextScheduled(message.next);
         } else if (message.hasOwnProperty('start')) {
             window.moveToActive(message.start);
         } else if (message.hasOwnProperty('done')) {

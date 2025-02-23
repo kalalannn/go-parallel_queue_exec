@@ -162,15 +162,15 @@ func (s *ExecutorService) ActiveTasks() map[string]int {
 	return s.exec.ActiveTasks()
 }
 
-func (s *ExecutorService) PlannedTasks() []map[string]int {
-	plannedTasks := make([]map[string]int, 0)
-	for _, t := range s.exec.PlannedTasks() {
-		plannedTasks = append(plannedTasks, map[string]int{t.ID: t.Duration})
+func (s *ExecutorService) ScheduledTasks() []map[string]int {
+	scheduledTasks := make([]map[string]int, 0)
+	for _, t := range s.exec.ScheduledTasks() {
+		scheduledTasks = append(scheduledTasks, map[string]int{t.ID: t.Duration})
 	}
-	return plannedTasks
+	return scheduledTasks
 }
 
-func (s *ExecutorService) PlanExecuteTasks(data map[string]int) {
+func (s *ExecutorService) ScheduleExecuteTasks(data map[string]int) {
 	count := len(data)
 	tasks := make([]*task.Task, count)
 	i := 0
@@ -178,6 +178,6 @@ func (s *ExecutorService) PlanExecuteTasks(data map[string]int) {
 		tasks[i] = task.NewTask(k, v)
 		i++
 	}
-	s.exec.PlanTasks(tasks...)
+	s.exec.ScheduleTasks(tasks...)
 	s.exec.Notify()
 }

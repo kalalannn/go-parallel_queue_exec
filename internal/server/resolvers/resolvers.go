@@ -17,8 +17,8 @@ const (
 	restErrorTag   = "error"
 )
 const (
-	tasksActiveTag  = "active"
-	tasksPlannedTag = "planned"
+	tasksActiveTag    = "active"
+	tasksScheduledTag = "scheduled"
 )
 const (
 	wsReadErrorMsg  = "Read error: "
@@ -76,12 +76,12 @@ func (r *Resolver) WebSocketResolver(c *websocket.Conn) {
 
 func (r *Resolver) TasksResolver(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		tasksActiveTag:  r.execService.ActiveTasks(),
-		tasksPlannedTag: r.execService.PlannedTasks(),
+		tasksActiveTag:    r.execService.ActiveTasks(),
+		tasksScheduledTag: r.execService.ScheduledTasks(),
 	})
 }
 
-func (r *Resolver) PlanResolver(c *fiber.Ctx) error {
+func (r *Resolver) ScheduleResolver(c *fiber.Ctx) error {
 	c.Accepts(restAccepts)
 	var data map[string]int
 	if err := c.BodyParser(&data); err != nil {
@@ -90,7 +90,7 @@ func (r *Resolver) PlanResolver(c *fiber.Ctx) error {
 		})
 	}
 
-	r.execService.PlanExecuteTasks(data)
+	r.execService.ScheduleExecuteTasks(data)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		restMessageTag: messages.OK,

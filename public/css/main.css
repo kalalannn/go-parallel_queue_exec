@@ -130,8 +130,8 @@ button {
     background-color: #f1707d;
 }
 
-.planned {
-    background-color: #7EC8E8;  /* Blue for planned tasks */
+.scheduled {
+    background-color: #7EC8E8;  /* Blue for scheduled tasks */
 }
 
 .next {
