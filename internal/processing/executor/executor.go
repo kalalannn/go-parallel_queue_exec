@@ -4,6 +4,7 @@ import (
 	"go-parallel_queue/internal/messages"
 	"go-parallel_queue/internal/processing/queue"
 	"go-parallel_queue/internal/processing/task"
+	"go-parallel_queue/pkg/utils"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -61,10 +62,11 @@ func (e *Executor) ScheduledTasks() []*task.Task {
 	return e.queue.Tasks()
 }
 
+// return copy of e.activeTasks
 func (e *Executor) ActiveTasks() map[string]int {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
-	return e.activeTasks
+	return utils.CopyMap(e.activeTasks)
 }
 
 func (e *Executor) Notify() {
@@ -135,7 +137,9 @@ OuterLoop:
 }
 
 func (e *Executor) nextTask() (*task.Task, bool) {
-	return e.queue.ShiftUnique(e.ActiveTasks())
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	return e.queue.ShiftUnique(e.activeTasks)
 }
 
 func (e *Executor) executeTask(t *task.Task) {
@@ -143,7 +147,7 @@ func (e *Executor) executeTask(t *task.Task) {
 		<-e.workerChan
 
 		// increment countProcessed (++)
-		atomic.StoreInt64(&e.CountProcessed, atomic.LoadInt64(&e.CountProcessed)+1)
+		atomic.AddInt64(&e.CountProcessed, 1)
 
 		e.mu.Lock()
 		delete(e.activeTasks, t.ID)
