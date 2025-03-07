@@ -6,6 +6,7 @@ import (
 	"go-parallel_queue/internal/processing/task"
 	"log"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -19,8 +20,8 @@ type Executor struct {
 	mu             sync.RWMutex
 	wg             sync.WaitGroup
 	cond           *sync.Cond
-	CountProcessed int
-	ShutdownFlag   bool // mimimize padding
+	CountProcessed int64
+	ShutdownFlag   atomic.Bool
 }
 
 type ExecutorOptions struct {
@@ -71,9 +72,7 @@ func (e *Executor) Notify() {
 }
 
 func (e *Executor) Shutdown() {
-	e.mu.Lock()
-	e.ShutdownFlag = true
-	e.mu.Unlock()
+	e.ShutdownFlag.Store(true)
 
 	e.Notify()
 }
@@ -87,13 +86,10 @@ OuterLoop:
 		e.cond.L.Lock()
 		for {
 			// check shutdown
-			e.mu.RLock()
-			if e.ShutdownFlag {
-				e.mu.RUnlock()
+			if e.ShutdownFlag.Load() {
 				e.cond.L.Unlock()
 				break OuterLoop
 			}
-			e.mu.RUnlock()
 
 			// next
 			task, ok = e.nextTask()
@@ -146,8 +142,10 @@ func (e *Executor) executeTask(t *task.Task) {
 	defer func() {
 		<-e.workerChan
 
+		// increment countProcessed (++)
+		atomic.StoreInt64(&e.CountProcessed, atomic.LoadInt64(&e.CountProcessed)+1)
+
 		e.mu.Lock()
-		e.CountProcessed++
 		delete(e.activeTasks, t.ID)
 		e.mu.Unlock()
 

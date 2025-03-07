@@ -26,8 +26,8 @@ func TestEmpty(t *testing.T) {
 	ourWg.Wait()
 
 	// assert
-	assert.Equal(t, 0, e.CountProcessed)
-	assert.True(t, e.ShutdownFlag)
+	assert.Equal(t, int64(0), e.CountProcessed)
+	assert.True(t, e.ShutdownFlag.Load())
 }
 
 func TestShutdownFasterThanOne(t *testing.T) {
@@ -46,8 +46,8 @@ func TestShutdownFasterThanOne(t *testing.T) {
 	ourWg.Wait()
 
 	// assert
-	assert.Equal(t, 0, e.CountProcessed)
-	assert.True(t, e.ShutdownFlag)
+	assert.Equal(t, int64(0), e.CountProcessed)
+	assert.True(t, e.ShutdownFlag.Load())
 }
 
 func TestOneProcessed(t *testing.T) {
@@ -68,8 +68,8 @@ func TestOneProcessed(t *testing.T) {
 	ourWg.Wait()
 
 	// assert
-	assert.Equal(t, 1, e.CountProcessed)
-	assert.True(t, e.ShutdownFlag)
+	assert.Equal(t, int64(1), e.CountProcessed)
+	assert.True(t, e.ShutdownFlag.Load())
 }
 
 func TestNobodyBlocked(t *testing.T) {
@@ -90,8 +90,8 @@ func TestNobodyBlocked(t *testing.T) {
 	ourWg.Wait()
 
 	// assert
-	assert.Equal(t, 1, e.CountProcessed)
-	assert.True(t, e.ShutdownFlag)
+	assert.Equal(t, int64(1), e.CountProcessed)
+	assert.True(t, e.ShutdownFlag.Load())
 }
 
 // if failing increase gap or sleepTime
@@ -156,5 +156,5 @@ func TestUniqueExecution(t *testing.T) {
 	ourWg.Wait()
 
 	// assert
-	assert.Equal(t, 2, e.CountProcessed)
+	assert.Equal(t, int64(2), e.CountProcessed)
 }
